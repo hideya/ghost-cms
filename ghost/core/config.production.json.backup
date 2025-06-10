@@ -1,0 +1,27 @@
+{
+    "database": {
+        "client": "pg",
+        "connection": {
+            "connectionString": "${DATABASE_URL}"
+        }
+    },
+    "storage": {
+        "active": "s3",
+        "s3": {
+            "endpoint": "${R2_ENDPOINT}",
+            "accessKeyId": "${R2_ACCESS_KEY_ID}",
+            "secretAccessKey": "${R2_SECRET_ACCESS_KEY}",
+            "bucket": "${R2_BUCKET_NAME}",
+            "region": "auto",
+            "forcePathStyle": true,
+            "assetHost": "${R2_PUBLIC_URL}"
+        }
+    },
+    "paths": {
+        "contentPath": "content/"
+    },
+    "logging": {
+        "level": "info",
+        "transports": ["stdout"]
+    }
+}
