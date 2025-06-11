@@ -189,3 +189,6 @@ temp*.sql
 # yalc — for linking local packages in a docker compatible way
 yalc.lock
 .yalc
+
+# See AIVEN_MYSQL_SETUP.md
+.env
