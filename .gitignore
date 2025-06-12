@@ -192,3 +192,4 @@ yalc.lock
 
 # See AIVEN_MYSQL_SETUP.md
 .env
+content/adapters/*

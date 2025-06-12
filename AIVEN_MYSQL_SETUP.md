@@ -2,6 +2,18 @@
 
 This document describes how to set up Ghost CMS (version 5.122.0) to work with a MySQL database hosted on Aiven. This process differs from the standard Ghost installation documented at https://ghost.org/docs/install/source/, particularly because we skip the `yarn setup` step that would normally configure a local MySQL instance running in Docker.
 
+## Why Use Aiven MySQL?
+
+- **Permanent free tier** - No time limits (unlike AWS RDS 12-month limit or GCP's 90-day trial)
+- **Managed database service** - Automated backups, monitoring, maintenance, and security updates
+- **Multi-cloud flexibility** - Runs on AWS, GCP, and Azure to avoid vendor lock-in
+- **Developer-friendly** - Start free, scale seamlessly as your project grows
+- **Clear pricing** - Predictable costs with transparent upgrade paths
+- **Geographic options** - Choose optimal regions for performance
+- **SSL/TLS security** - Encrypted connections and enterprise security features
+
+For startup projects and development environments, Aiven's permanent free tier eliminates the anxiety of time-limited trials while providing production-ready database infrastructure. This makes it ideal for projects that need reliable, external database access without upfront costs or surprise bills.
+
 ## Prerequisites
 
 - Node.js and Yarn installed
@@ -27,7 +39,7 @@ Instead of using a config file, Ghost can be configured using environment variab
 
 ```bash
 # Create .env file from template in project root
-cp .env.template .env
+cp .env.template.aiven .env
 ```
 
 **Note**: The `.env` file has been added to `.gitignore` and will not be committed to version control.
@@ -198,7 +210,7 @@ For users who want to repeat the setup process, here are the essential commands:
 
 ```bash
 # 1. Setup environment
-cp .env.template .env
+cp .env.template.aiven .env
 # (edit .env with your Aiven MySQL credentials)
 
 # 2. Build and initialize
@@ -218,3 +230,5 @@ yarn dev
 - [Official Ghost Source Installation Guide](https://ghost.org/docs/install/source/)
 - [Aiven MySQL Documentation](https://aiven.io/docs/products/mysql)
 - [Ghost Configuration Documentation](https://ghost.org/docs/config/)
+- [Aiven Free Tier Details](https://aiven.io/pricing)
+- [Your CLOUDFLARE_R2_SETUP.md](./CLOUDFLARE_R2_SETUP.md) for shared file storage configuration
