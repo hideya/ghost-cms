@@ -32,24 +32,23 @@ Navigate to your Ghost installation directory and install the storage adapter:
 # Navigate to your Ghost installation
 cd /path/to/your/ghost-cms
 
+# Build storage adapter from the repo that includes debug logging
 # We work in /tmp to avoid yarn workspace conflicts:
 # - Ghost uses yarn workspaces (monorepo structure)
-# - Installing here would modify Ghost's package.json
 # - Working in /tmp keeps Ghost's dependencies clean
+# - Building from source ensures latest improvements
 pushd /tmp
-mkdir ghost-adapter-temp
-cd ghost-adapter-temp
-yarn add ghos3
-popd
-
-# Create storage adapter directory and copy files
-mkdir -p content/adapters/storage/s3
-cp -r /tmp/ghost-adapter-temp/node_modules/ghos3/* content/adapters/storage/s3/
-
-# Install adapter dependencies
-pushd content/adapters/storage/s3
+git clone https://github.com/hideya/ghost-s3-adapter.git
+cd ghost-s3-adapter
 yarn install
+yarn build
 popd
+
+# Create storage adapter directory and copy built files
+mkdir -p content/adapters/storage/s3
+cp /tmp/ghost-s3-adapter/index.js content/adapters/storage/s3/
+cp /tmp/ghost-s3-adapter/package.json content/adapters/storage/s3/
+cp -r /tmp/ghost-s3-adapter/node_modules content/adapters/storage/s3/
 
 # Verify installation
 ls -la content/adapters/storage/s3/
@@ -59,13 +58,11 @@ ls -la content/adapters/storage/s3/
 mkdir -p ghost/core/content/adapters/storage
 ln -sf $(pwd)/content/adapters/storage/s3 ghost/core/content/adapters/storage/s3
 
-# Install adapter dependencies
-pushd content/adapters/storage/s3
-yarn install
-popd
-
 # Verify symbolic link
 ls -la ghost/core/content/adapters/storage/
+
+# Cleanup temporary files
+rm -rf /tmp/ghost-s3-adapter
 ```
 
 ### 2. Configure Environment Variables
@@ -326,19 +323,26 @@ This setup was tested with:
 For users who want to repeat the setup process:
 
 ```bash
-# 1. Install S3 adapter for R2
+# 1. Install improved S3 adapter for R2
 cd /path/to/your/ghost-cms
-pushd /tmp && mkdir ghost-adapter-temp && cd ghost-adapter-temp && yarn add ghos3 && popd
+# Build storage adapter from the repo that includes debug logging
+pushd /tmp
+git clone https://github.com/hideya/ghost-s3-adapter.git
+cd ghost-s3-adapter && yarn install && yarn build
+popd
 mkdir -p content/adapters/storage/s3
-cp -r /tmp/ghost-adapter-temp/node_modules/ghos3/* content/adapters/storage/s3/
+cp /tmp/ghost-s3-adapter/index.js content/adapters/storage/s3/
+cp /tmp/ghost-s3-adapter/package.json content/adapters/storage/s3/
+cp -r /tmp/ghost-s3-adapter/node_modules content/adapters/storage/s3/
 # Create symlink for Ghost 5.x dev mode bug workaround
-mkdir -p ghost/core/content/adapters/storage && ln -sf $(pwd)/content/adapters/storage/s3 ghost/core/content/adapters/storage/s3
-# Install adapter dependencies
-pushd content/adapters/storage/s3 && yarn install && popd
-rm -rf /tmp/ghost-adapter-temp
+mkdir -p ghost/core/content/adapters/storage
+ln -sf $(pwd)/content/adapters/storage/s3 ghost/core/content/adapters/storage/s3
+# Cleanup
+rm -rf /tmp/ghost-s3-adapter
 
 # 2. Configure environment (edit .env with your R2 credentials)
 # Add storage__active=s3 and other S3/R2 settings
+# Don't forget to enable public access on your R2 bucket!
 
 # 3. Start Ghost
 cd /path/to/ghost-cms
