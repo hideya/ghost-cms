@@ -83,6 +83,20 @@ if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.
   cd ghost/core && npx tsc && cd ../..
 fi
 
+# Build Admin-X components first (required dependencies for Ghost Admin)
+echo "Building Admin-X components..."
+echo "Building Admin-X Settings..."
+yarn workspace @tryghost/admin-x-settings run build
+
+echo "Building Admin-X ActivityPub..."
+yarn workspace @tryghost/admin-x-activitypub run build
+
+echo "Building Posts component..."
+yarn workspace @tryghost/posts run build
+
+echo "Building Stats component..."
+yarn workspace @tryghost/stats run build
+
 # Build Ghost Admin (Ember.js frontend)
 echo "Building Ghost Admin interface..."
 yarn workspace ghost-admin run build
@@ -111,7 +125,17 @@ echo "Checking Ghost Admin build output..."
 ls -la ghost/admin/dist/ | head -10
 
 echo "Checking Admin-X components were built..."
-ls -la apps/admin-x-settings/dist/ | head -5 || echo "Admin-X Settings not built separately (this is OK - it's embedded in Ghost Admin)"
-ls -la apps/admin-x-activitypub/dist/ | head -5 || echo "Admin-X ActivityPub not built separately (this is OK - it's embedded in Ghost Admin)"
+if [ ! -f "apps/admin-x-settings/dist/admin-x-settings.js" ]; then
+  echo "ERROR: Admin-X Settings build failed - missing admin-x-settings.js"
+  exit 1
+fi
+
+if [ ! -f "apps/admin-x-activitypub/dist/admin-x-activitypub.js" ]; then
+  echo "ERROR: Admin-X ActivityPub build failed - missing admin-x-activitypub.js"
+  exit 1
+fi
+
+echo "✓ Admin-X Settings: $(ls -la apps/admin-x-settings/dist/admin-x-settings.js)"
+echo "✓ Admin-X ActivityPub: $(ls -la apps/admin-x-activitypub/dist/admin-x-activitypub.js)"
 
 echo "Build complete and verified!"

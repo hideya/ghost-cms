@@ -116,6 +116,13 @@ If you see `Client request for 5.122 does not match server version 0.0.0` error:
 - Check build logs to ensure Ghost Admin build completes successfully
 - Verify that `ghost/admin/dist/` directory exists after build
 
+### Admin-X Components Build Issues
+If you see `ENOENT: no such file or directory, open '../../apps/admin-x-settings/dist/admin-x-settings.js'` error:
+- This indicates Admin-X components weren't built before Ghost Admin tried to use them
+- The updated build script now explicitly builds Admin-X components first
+- Check build logs to ensure all Admin-X components build successfully
+- Verify that `apps/admin-x-settings/dist/admin-x-settings.js` and other Admin-X dist files exist
+
 ### Database Connection Issues
 - Verify Aiven MySQL credentials in secret file
 - Check that Aiven allows connections from Render's IP ranges

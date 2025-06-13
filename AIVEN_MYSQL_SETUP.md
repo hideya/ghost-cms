@@ -58,6 +58,11 @@ database__connection__password=your-password
 database__connection__database=ghost
 database__connection__charset=utf8mb4
 database__connection__ssl__rejectUnauthorized=false
+
+# Server Configuration
+server__host=0.0.0.0
+server__port=2368
+url=http://localhost:2368
 ```
 
 **Environment Variable Explanations**:
