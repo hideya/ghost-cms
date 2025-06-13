@@ -23,14 +23,16 @@ echo "Storage asset host: $storage__s3__assetHost"
 # Note: Intentionally NOT showing passwords, API keys, or other secrets
 
 # Fix Ghost version detection (monorepo issue)
-echo "Fixing Ghost version detection..."
+echo "Checking Ghost root and core versions ..."
 echo "Current root package.json version: $(grep '"version"' package.json | head -1)"
 echo "Current Ghost core version: $(grep '"version"' ghost/core/package.json | head -1)"
 
-# Temporarily update root package.json to have the correct version
-echo "Updating root package.json version to match Ghost core..."
-sed -i 's/"version": "0.0.0-private"/"version": "5.122.0"/' package.json
-echo "Updated root package.json version: $(grep '"version"' package.json | head -1)"
+root_version=$(jq -r '.version' package.json)
+core_version=$(jq -r '.version' ghost/core/package.json)
+if [ "$root_version" != "$core_version" ]; then
+  echo "Versions are not the same. Will fail to show the admin page. Exiting."
+  exit 1
+fi
 
 # Verify critical files exist
 echo "Checking critical files..."
@@ -41,4 +43,6 @@ fi
 
 # Start Ghost with memory optimization for Render free tier
 echo "Starting Ghost with memory optimization..."
+# Limits the "old space" heap memory that the Node.js V8 engine can use for long-lived JavaScript objects
+# This 460MB limitation is seen in official Heroku documentation and widely used in practice
 node --max_old_space_size=460 ghost/core/index.js

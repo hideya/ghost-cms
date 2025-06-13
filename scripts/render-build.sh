@@ -71,7 +71,8 @@ echo "Current Ghost core version: $(grep '"version"' ghost/core/package.json | h
 
 # Temporarily update root package.json to have the correct version
 echo "Updating root package.json version to match Ghost core..."
-sed -i 's/"version": "0.0.0-private"/"version": "5.122.0"/' package.json
+core_version=$(jq -r '.version' ghost/core/package.json)
+jq --arg v "$core_version" '.version = $v' package.json > package.tmp.json && mv package.tmp.json package.json
 echo "Updated root package.json version: $(grep '"version"' package.json | head -1)"
 
 # Production optimizations
