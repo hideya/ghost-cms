@@ -116,7 +116,6 @@ If you see `Client request for 5.122 does not match server version 0.0.0` error:
 - **Fix**: The updated build and start scripts now automatically fix this by updating the root package.json version during deployment
 - The scripts temporarily change the root package.json version from "0.0.0-private" to "5.122.0"
 - This ensures Ghost reports the correct version to the admin interface
-- You can remove the `GHOST_VERSION=5.122.0` environment variable as it's no longer needed
 - After redeploying with the updated scripts, the admin interface should work properly
 
 ### Admin-X Components Build Issues

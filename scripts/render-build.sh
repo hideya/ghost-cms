@@ -50,7 +50,6 @@ set -a; source .env; set +a
 
 echo "Environment check:"
 echo "NODE_ENV: $NODE_ENV"
-echo "GHOST_VERSION: $GHOST_VERSION"
 echo "PORT: $PORT"
 echo "URL: $url"
 echo "Database client: $database__client"
