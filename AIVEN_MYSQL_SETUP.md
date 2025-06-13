@@ -1,6 +1,8 @@
 # Ghost CMS Setup with Aiven MySQL
 
-This document describes how to set up Ghost CMS (version 5.122.0) to work with a MySQL database hosted on Aiven. This process differs from the standard Ghost installation documented at https://ghost.org/docs/install/source/, particularly because we skip the `yarn setup` step that would normally configure a local MySQL instance running in Docker.
+This document describes how to configure Ghost (version 5.122.0) to work with a MySQL database hosted on Aiven.
+The process differs from the standard Ghost installation documented at https://ghost.org/docs/install/source/
+because it skips the `yarn setup` step, which would normally configure a local MySQL instance running in Docker.
 
 ## Why Use Aiven MySQL?
 
@@ -56,11 +58,6 @@ database__connection__password=your-password
 database__connection__database=ghost
 database__connection__charset=utf8mb4
 database__connection__ssl__rejectUnauthorized=false
-
-# Server Configuration
-server__host=0.0.0.0
-server__port=2368
-url=http://localhost:2368
 ```
 
 **Environment Variable Explanations**:

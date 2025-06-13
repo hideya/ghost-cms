@@ -109,6 +109,13 @@ If you see `Cannot find module './IdentityTokenService'` error:
 - Check build logs for TypeScript compilation errors
 - Verify that `IdentityTokenService.js` exists after build in `ghost/core/core/server/services/identity-tokens/`
 
+### Ghost Admin Version Mismatch
+If you see `Client request for 5.122 does not match server version 0.0.0` error:
+- This indicates Ghost Admin (frontend) wasn't built during deployment
+- The updated build script now includes `yarn workspace ghost-admin run build`
+- Check build logs to ensure Ghost Admin build completes successfully
+- Verify that `ghost/admin/dist/` directory exists after build
+
 ### Database Connection Issues
 - Verify Aiven MySQL credentials in secret file
 - Check that Aiven allows connections from Render's IP ranges

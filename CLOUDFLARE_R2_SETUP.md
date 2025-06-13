@@ -1,6 +1,8 @@
 # Ghost CMS Setup with Cloudflare R2 Storage
 
-This document describes how to configure Ghost CMS (version 5.122.0) to use Cloudflare R2 object storage for media files instead of local storage. This setup is essential for running multiple Ghost instances that share the same database, ensuring all instances can access the same uploaded files.
+This document explains how to configure Ghost (version 5.122.0) to use Cloudflare R2 object storage system instead of local storage for media files.
+It is a companion to AIVEN_MYSQL_SETUP.md, which describes setting up Ghost to work with a MySQL database hosted on Aiven.
+This setup is essential for running multiple Ghost instances that share the same database and ensures that all instances can access the same uploaded files via cloud storage.
 
 ## Why Use Cloudflare R2?
 
@@ -24,7 +26,8 @@ This document describes how to configure Ghost CMS (version 5.122.0) to use Clou
 
 We'll use the battle-tested `gumlet/ghost-s3-adapter` which works excellently with Cloudflare R2 and has years of real-world usage.
 
-**Note:** The installation process below may seem complex, but it's designed to work with Ghost's plugin architecture. See [Appendix: Why This Installation Process](#appendix-why-this-installation-process) for technical details.
+**Note:** The installation process below may seem complex, but it's designed to work with Ghost's plugin architecture.
+See [Appendix: Why This Installation Process](#appendix-why-this-installation-process) for technical details.
 
 Navigate to your Ghost installation directory and install the storage adapter:
 

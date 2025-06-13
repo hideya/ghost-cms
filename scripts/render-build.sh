@@ -83,6 +83,10 @@ if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.
   cd ghost/core && npx tsc && cd ../..
 fi
 
+# Build Ghost Admin (Ember.js frontend)
+echo "Building Ghost Admin interface..."
+yarn workspace ghost-admin run build
+
 # Build assets and other components
 echo "Building Ghost assets..."
 yarn workspace ghost run build:assets
@@ -94,10 +98,20 @@ yarn build
 # Verify that critical JavaScript files were created
 echo "Verifying build artifacts..."
 if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.js" ]; then
-  echo "ERROR: IdentityTokenService.ts was not compiled to .js"
-  echo "Listing files in identity-tokens directory:"
-  ls -la ghost/core/core/server/services/identity-tokens/
+  echo "ERROR: IdentityTokenService.js missing - TypeScript compilation failed"
   exit 1
 fi
+
+if [ ! -d "ghost/admin/dist" ]; then
+  echo "ERROR: Ghost Admin dist directory missing - Admin build failed"
+  exit 1
+fi
+
+echo "Checking Ghost Admin build output..."
+ls -la ghost/admin/dist/ | head -10
+
+echo "Checking Admin-X components were built..."
+ls -la apps/admin-x-settings/dist/ | head -5 || echo "Admin-X Settings not built separately (this is OK - it's embedded in Ghost Admin)"
+ls -la apps/admin-x-activitypub/dist/ | head -5 || echo "Admin-X ActivityPub not built separately (this is OK - it's embedded in Ghost Admin)"
 
 echo "Build complete and verified!"
