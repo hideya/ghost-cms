@@ -4,7 +4,6 @@ set -xe
 echo "Start building Ghost..."
 echo "Build environment: $NODE_ENV"
 echo "Ghost version: $(cat ghost/core/package.json | grep '"version"' | head -1 | cut -d'"' -f4)"
-# Do NOT display .env contents in logs for security
 
 echo "Installing dependencies..."
 yarn install
