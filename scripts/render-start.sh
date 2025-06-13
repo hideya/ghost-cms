@@ -44,5 +44,5 @@ fi
 # Start Ghost with memory optimization for Render free tier
 echo "Starting Ghost with memory optimization..."
 # Limits the "old space" heap memory that the Node.js V8 engine can use for long-lived JavaScript objects
-# This 460MB limitation is seen in official Heroku documentation and widely used in practice
+# This 460MB limitation for 512MB system is seen in official Heroku documentation and widely used in practice
 node --max_old_space_size=460 ghost/core/index.js
