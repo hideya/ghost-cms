@@ -52,9 +52,6 @@ In Render dashboard → Your Service → Environment:
 # Production Environment
 NODE_ENV=production
 
-# Ghost Version (fix for monorepo version mismatch)
-GHOST_VERSION=5.122.0
-
 # Server Configuration
 server__host=0.0.0.0
 server__port=$PORT
@@ -116,12 +113,11 @@ If you see `Cannot find module './IdentityTokenService'` error:
 If you see `Client request for 5.122 does not match server version 0.0.0` error:
 - This indicates Ghost is reading the version from the wrong package.json file  
 - Ghost is reading from the root monorepo package.json (version "0.0.0-private") instead of ghost/core/package.json (version "5.122.0")
-- **Fix**: Add `GHOST_VERSION=5.122.0` to your `.env` secret file in Render
-- This explicitly tells Ghost what version to report to the admin interface
-- After adding this environment variable, redeploy your Ghost service
-- The updated build script now includes `yarn workspace ghost-admin run build`
-- Check build logs to ensure Ghost Admin build completes successfully
-- Verify that `ghost/admin/dist/` directory exists after build
+- **Fix**: The updated build and start scripts now automatically fix this by updating the root package.json version during deployment
+- The scripts temporarily change the root package.json version from "0.0.0-private" to "5.122.0"
+- This ensures Ghost reports the correct version to the admin interface
+- You can remove the `GHOST_VERSION=5.122.0` environment variable as it's no longer needed
+- After redeploying with the updated scripts, the admin interface should work properly
 
 ### Admin-X Components Build Issues
 If you see `ENOENT: no such file or directory, open '../../apps/admin-x-settings/dist/admin-x-settings.js'` error:

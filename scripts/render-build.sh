@@ -13,13 +13,12 @@ yarn install
 echo "Resetting build cache..."
 yarn nx reset
 
-# Debug: Show TypeScript version and Ghost workspace structure
-echo "Debug: TypeScript information:"
-echo "TypeScript version: $(yarn --silent typescript --version || echo 'TypeScript not found in PATH')"
-echo "Ghost workspace structure:"
+# Debug: Show Ghost workspace structure
+echo "Debug: Ghost workspace structure:"
 ls -la ghost/
-echo "Ghost core package.json:"
-cat ghost/core/package.json | grep -A5 -B5 "scripts\|typescript"
+echo "Ghost core package.json version:"
+grep '"version"' ghost/core/package.json | head -1
+echo "TypeScript build will use workspace-specific compiler"
 
 echo "Installing S3 storage adapter..."
 pushd /tmp
@@ -64,6 +63,16 @@ echo "Storage bucket: $storage__s3__bucket"
 echo "Storage endpoint: $storage__s3__endpoint"
 echo "Storage asset host: $storage__s3__assetHost"
 # Note: Intentionally NOT showing passwords, API keys, or other secrets
+
+# Fix Ghost version detection (monorepo issue)
+echo "Fixing Ghost version detection..."
+echo "Current root package.json version: $(grep '"version"' package.json | head -1)"
+echo "Current Ghost core version: $(grep '"version"' ghost/core/package.json | head -1)"
+
+# Temporarily update root package.json to have the correct version
+echo "Updating root package.json version to match Ghost core..."
+sed -i 's/"version": "0.0.0-private"/"version": "5.122.0"/' package.json
+echo "Updated root package.json version: $(grep '"version"' package.json | head -1)"
 
 # Production optimizations
 echo "Setting production environment..."
