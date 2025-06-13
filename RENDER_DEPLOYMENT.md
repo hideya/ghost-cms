@@ -5,6 +5,7 @@ This document provides the complete setup for deploying Ghost CMS to Render's fr
 ## Prerequisites
 
 - Ghost CMS repository with Aiven MySQL and R2 configured (following AIVEN_MYSQL_SETUP.md and CLOUDFLARE_R2_SETUP.md)
+- Email service configured for Ghost admin authentication (Gmail SMTP recommended - see Email Configuration section below)
 - Render account
 - GitHub repository connected to Render
 
@@ -76,6 +77,13 @@ storage__s3__bucket=your-r2-bucket-name
 storage__s3__endpoint=https://your-specific-hash.r2.cloudflarestorage.com
 storage__s3__forcePathStyle=true
 storage__s3__assetHost=https://pub-your-specific-hash.r2.dev
+
+# Email Configuration (Required for admin login)
+mail__transport=SMTP
+mail__from=your-email@gmail.com
+mail__options__service=Gmail
+mail__options__auth__user=your-email@gmail.com
+mail__options__auth__pass="your gmail app password"
 ```
 
 **Important**: Replace all placeholder values with your actual credentials and URLs.
@@ -148,3 +156,44 @@ If you see `ENOENT: no such file or directory, open '../../apps/admin-x-settings
 - **Total monthly cost**: $0
 
 This setup provides a production-ready Ghost CMS deployment without any recurring costs!
+
+## Email Configuration
+
+Ghost requires email functionality for admin authentication when connecting to existing databases. When you try to log into Ghost Admin, it sends a "magic link" to your email instead of using password-based login.
+
+### Recommended: Gmail SMTP (Free)
+
+Gmail provides 100 emails/day permanently free, which is perfect for Ghost admin use.
+
+**Setup Steps:**
+1. **Enable 2-Factor Authentication** on your Gmail account
+2. **Generate App Password**:
+   - Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
+   - Select "Mail" and "Other (Custom name)"
+   - Enter "Ghost CMS" as the name
+   - Copy the 16-character password (keep spaces/hyphens as shown)
+3. **Use the credentials** in your `.env` file as shown above
+
+### Alternative: Brevo (formerly Sendinblue)
+
+If you prefer a dedicated transactional email service:
+- **Free tier**: 300 emails/day permanently
+- **Setup**: Sign up at [brevo.com](https://www.brevo.com) and get SMTP credentials
+- **Configuration**:
+```env
+mail__transport=SMTP
+mail__from=noreply@yourdomain.com
+mail__options__host=smtp-relay.brevo.com
+mail__options__port=587
+mail__options__auth__user=your-brevo-login-email
+mail__options__auth__pass=your-brevo-smtp-key
+```
+
+### Alternative: Resend
+
+For a modern developer-focused service:
+- **Free tier**: 3,000 emails/month permanently
+- **Setup**: Sign up at [resend.com](https://resend.com) and get API key
+- **Configuration**: Requires API-based setup (more complex)
+
+**Note**: Without email configuration, you won't be able to log into Ghost Admin on Render, as the system will try to send magic link emails and fail.
