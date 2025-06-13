@@ -102,6 +102,13 @@ After successful deployment:
 - Verify all secret files are properly configured
 - Ensure GitHub repository has the build scripts
 
+### TypeScript Compilation Issues
+If you see `Cannot find module './IdentityTokenService'` error:
+- This indicates TypeScript files weren't compiled to JavaScript during build
+- The updated `render-build.sh` script includes explicit TypeScript compilation steps
+- Check build logs for TypeScript compilation errors
+- Verify that `IdentityTokenService.js` exists after build in `ghost/core/core/server/services/identity-tokens/`
+
 ### Database Connection Issues
 - Verify Aiven MySQL credentials in secret file
 - Check that Aiven allows connections from Render's IP ranges

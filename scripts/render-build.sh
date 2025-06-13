@@ -6,7 +6,19 @@ echo ".env settings:"
 cat .env
 
 echo "Installing dependencies..."
-yarn install && yarn nx reset
+yarn install
+
+# Reset Nx cache to ensure clean build
+echo "Resetting build cache..."
+yarn nx reset
+
+# Debug: Show TypeScript version and Ghost workspace structure
+echo "Debug: TypeScript information:"
+echo "TypeScript version: $(yarn --silent typescript --version || echo 'TypeScript not found in PATH')"
+echo "Ghost workspace structure:"
+ls -la ghost/
+echo "Ghost core package.json:"
+cat ghost/core/package.json | grep -A5 -B5 "scripts\|typescript"
 
 echo "Installing S3 storage adapter..."
 pushd /tmp
@@ -35,6 +47,33 @@ rm -rf /tmp/ghost-s3-adapter
 
 echo "Loading environment variables and building Ghost..."
 set -a; source .env; set +a
+
+# First, ensure TypeScript compilation happens
+echo "Compiling TypeScript files..."
+yarn workspace ghost run build:tsc
+
+# Check if TypeScript compilation succeeded
+if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.js" ]; then
+  echo "ERROR: TypeScript compilation failed - IdentityTokenService.js not created"
+  echo "Attempting alternative compilation..."
+  cd ghost/core && npx tsc && cd ../..
+fi
+
+# Build assets and other components
+echo "Building Ghost assets..."
+yarn workspace ghost run build:assets
+
+# Build the entire Ghost application (all workspaces)
+echo "Building full Ghost application..."
 yarn build
 
-echo "Build complete!"
+# Verify that critical JavaScript files were created
+echo "Verifying build artifacts..."
+if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.js" ]; then
+  echo "ERROR: IdentityTokenService.ts was not compiled to .js"
+  echo "Listing files in identity-tokens directory:"
+  ls -la ghost/core/core/server/services/identity-tokens/
+  exit 1
+fi
+
+echo "Build complete and verified!"
