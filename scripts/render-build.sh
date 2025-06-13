@@ -1,9 +1,10 @@
 #!/bin/bash
 set -xe
 
-echo "Start buiding Ghost..."
-echo ".env settings:"
-cat .env
+echo "Start building Ghost..."
+echo "Build environment: $NODE_ENV"
+echo "Ghost version: $(cat ghost/core/package.json | grep '"version"' | head -1 | cut -d'"' -f4)"
+# Do NOT display .env contents in logs for security
 
 echo "Installing dependencies..."
 yarn install
@@ -47,6 +48,29 @@ rm -rf /tmp/ghost-s3-adapter
 
 echo "Loading environment variables and building Ghost..."
 set -a; source .env; set +a
+
+echo "Environment check:"
+echo "NODE_ENV: $NODE_ENV"
+echo "PORT: $PORT"
+echo "URL: $url"
+echo "Database client: $database__client"
+echo "Database host: $database__connection__host"
+echo "Database port: $database__connection__port"
+echo "Database name: $database__connection__database"
+echo "Storage active: $storage__active"
+echo "Storage region: $storage__s3__region"
+echo "Storage bucket: $storage__s3__bucket"
+echo "Storage endpoint: $storage__s3__endpoint"
+echo "Storage asset host: $storage__s3__assetHost"
+# Note: Intentionally NOT showing passwords, API keys, or other secrets
+
+# Production optimizations
+echo "Setting production environment..."
+export NODE_ENV=production
+
+# Clear any existing builds
+echo "Cleaning previous builds..."
+yarn build:clean || echo "No previous builds to clean"
 
 # First, ensure TypeScript compilation happens
 echo "Compiling TypeScript files..."
