@@ -86,6 +86,9 @@ fi
 # Build Admin-X components in correct dependency order
 echo "Building Admin-X components in dependency order..."
 
+echo "Building Shade component (foundation)..."
+yarn workspace @tryghost/shade run build
+
 echo "Building Admin-X Design System (foundation)..."
 yarn workspace @tryghost/admin-x-design-system run build
 
@@ -132,6 +135,11 @@ echo "Checking Ghost Admin build output..."
 ls -la ghost/admin/dist/ | head -10
 
 echo "Checking Admin-X components were built..."
+if [ ! -d "apps/shade/es" ]; then
+  echo "ERROR: Shade component build failed - missing es directory"
+  exit 1
+fi
+
 if [ ! -d "apps/admin-x-design-system/dist" ]; then
   echo "ERROR: Admin-X Design System build failed - missing dist directory"
   exit 1
@@ -152,6 +160,7 @@ if [ ! -f "apps/admin-x-activitypub/dist/admin-x-activitypub.js" ]; then
   exit 1
 fi
 
+echo "✓ Shade component: $(ls -la apps/shade/es/ | wc -l) files"
 echo "✓ Admin-X Design System: $(ls -la apps/admin-x-design-system/dist/ | wc -l) files"
 echo "✓ Admin-X Framework: $(ls -la apps/admin-x-framework/dist/ | wc -l) files"
 echo "✓ Admin-X Settings: $(ls -la apps/admin-x-settings/dist/admin-x-settings.js)"
