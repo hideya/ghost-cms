@@ -52,6 +52,9 @@ In Render dashboard → Your Service → Environment:
 # Production Environment
 NODE_ENV=production
 
+# Ghost Version (fix for monorepo version mismatch)
+GHOST_VERSION=5.122.0
+
 # Server Configuration
 server__host=0.0.0.0
 server__port=$PORT
@@ -111,7 +114,11 @@ If you see `Cannot find module './IdentityTokenService'` error:
 
 ### Ghost Admin Version Mismatch
 If you see `Client request for 5.122 does not match server version 0.0.0` error:
-- This indicates Ghost Admin (frontend) wasn't built during deployment
+- This indicates Ghost is reading the version from the wrong package.json file  
+- Ghost is reading from the root monorepo package.json (version "0.0.0-private") instead of ghost/core/package.json (version "5.122.0")
+- **Fix**: Add `GHOST_VERSION=5.122.0` to your `.env` secret file in Render
+- This explicitly tells Ghost what version to report to the admin interface
+- After adding this environment variable, redeploy your Ghost service
 - The updated build script now includes `yarn workspace ghost-admin run build`
 - Check build logs to ensure Ghost Admin build completes successfully
 - Verify that `ghost/admin/dist/` directory exists after build
