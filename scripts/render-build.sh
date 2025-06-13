@@ -83,8 +83,15 @@ if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.
   cd ghost/core && npx tsc && cd ../..
 fi
 
-# Build Admin-X components first (required dependencies for Ghost Admin)
-echo "Building Admin-X components..."
+# Build Admin-X components in correct dependency order
+echo "Building Admin-X components in dependency order..."
+
+echo "Building Admin-X Design System (foundation)..."
+yarn workspace @tryghost/admin-x-design-system run build
+
+echo "Building Admin-X Framework (core)..."
+yarn workspace @tryghost/admin-x-framework run build
+
 echo "Building Admin-X Settings..."
 yarn workspace @tryghost/admin-x-settings run build
 
@@ -125,6 +132,16 @@ echo "Checking Ghost Admin build output..."
 ls -la ghost/admin/dist/ | head -10
 
 echo "Checking Admin-X components were built..."
+if [ ! -d "apps/admin-x-design-system/dist" ]; then
+  echo "ERROR: Admin-X Design System build failed - missing dist directory"
+  exit 1
+fi
+
+if [ ! -d "apps/admin-x-framework/dist" ]; then
+  echo "ERROR: Admin-X Framework build failed - missing dist directory"
+  exit 1
+fi
+
 if [ ! -f "apps/admin-x-settings/dist/admin-x-settings.js" ]; then
   echo "ERROR: Admin-X Settings build failed - missing admin-x-settings.js"
   exit 1
@@ -135,6 +152,8 @@ if [ ! -f "apps/admin-x-activitypub/dist/admin-x-activitypub.js" ]; then
   exit 1
 fi
 
+echo "✓ Admin-X Design System: $(ls -la apps/admin-x-design-system/dist/ | wc -l) files"
+echo "✓ Admin-X Framework: $(ls -la apps/admin-x-framework/dist/ | wc -l) files"
 echo "✓ Admin-X Settings: $(ls -la apps/admin-x-settings/dist/admin-x-settings.js)"
 echo "✓ Admin-X ActivityPub: $(ls -la apps/admin-x-activitypub/dist/admin-x-activitypub.js)"
 
