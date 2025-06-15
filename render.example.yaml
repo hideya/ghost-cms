@@ -1,0 +1,16 @@
+# Exported from Render
+services:
+- type: web
+  name: ghost-cms
+  runtime: node
+  # repo: https://github.com/hideya/ghost-cms
+  # branch: render
+  plan: free
+  envVars:
+  - key: .env
+    sync: false # Enter the contents manually from the Render dashboard as a Secret File
+  region: oregon
+  buildCommand: ./scripts/render-build.sh
+  startCommand: ./scripts/render-start.sh
+  autoDeployTrigger: commit
+version: "1"
