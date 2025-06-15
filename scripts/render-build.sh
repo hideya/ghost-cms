@@ -85,14 +85,14 @@ yarn workspace ghost run build:assets
 yarn workspace ghost run build:tsc
 
 # Verify that critical JavaScript files were created
-echo "Verifying build artifacts..."
-if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.js" ]; then
-  echo "ERROR: IdentityTokenService.js missing - TypeScript compilation failed"
+if [ ! -d "ghost/admin/dist" ]; then
+  echo "ERROR: Ghost Admin dist directory missing - Admin build failed"
   exit 1
 fi
 
-if [ ! -d "ghost/admin/dist" ]; then
-  echo "ERROR: Ghost Admin dist directory missing - Admin build failed"
+echo "Verifying build artifacts..."
+if [ ! -f "ghost/core/core/server/services/identity-tokens/IdentityTokenService.js" ]; then
+  echo "ERROR: IdentityTokenService.js missing - TypeScript compilation failed"
   exit 1
 fi
 
