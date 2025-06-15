@@ -32,6 +32,8 @@ This stateless architecture is ideal for Render's platform - no local file persi
 ./scripts/render-build.sh
 ```
 
+**Note**: The build script includes explicit ordering of Admin-X component builds. See "Appendix: Why Explicit Admin-X Component Ordering is Required" for technical details.
+
 ### Start Command
 ```bash
 ./scripts/render-start.sh
@@ -50,9 +52,6 @@ In Render dashboard → Your Service → Environment:
 - **Filename**: `.env`
 - **Contents**:
 ```env
-# Production Environment
-NODE_ENV=production
-
 # Server Configuration
 server__host=0.0.0.0
 server__port=$PORT
@@ -93,7 +92,8 @@ mail__options__auth__pass="your gmail app password"
 1. **Connect the render branch of your GitHub repo** to Render
 2. **Configure the service** with the build/start commands above
 3. **Add the `.env` secret file** with production values
-4. **Deploy** - Render will automatically build and start your Ghost instance
+4. **Deploy** - Render will automatically build and start your Ghost instance.
+   This process can take more than 10 minutes.
 
 ## Post-Deployment
 
@@ -148,15 +148,6 @@ If you see `ENOENT: no such file or directory, open '../../apps/admin-x-settings
 - Verify `server__host=0.0.0.0` for Render compatibility
 - Check start command logs in Render dashboard
 
-## Cost Breakdown (All Free Tier)
-
-- **Render**: 750 hours/month free
-- **Aiven MySQL**: Permanent free tier
-- **Cloudflare R2**: 10GB storage + unlimited egress
-- **Total monthly cost**: $0
-
-This setup provides a production-ready Ghost CMS deployment without any recurring costs!
-
 ## Email Configuration
 
 Ghost requires email functionality for admin authentication when connecting to existing databases. When you try to log into Ghost Admin, it sends a "magic link" to your email instead of using password-based login.
@@ -166,12 +157,10 @@ Ghost requires email functionality for admin authentication when connecting to e
 Gmail provides 100 emails/day permanently free, which is perfect for Ghost admin use.
 
 **Setup Steps:**
-1. **Enable 2-Factor Authentication** on your Gmail account
+1. **Enable 2-Step Verification (2FA)** on your Gmail account
+   - Go to https://myaccount.google.com/signinoptions/twosv and follow the instructions
 2. **Generate App Password**:
-   - Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-   - Select "Mail" and "Other (Custom name)"
-   - Enter "Ghost CMS" as the name
-   - Copy the 16-character password (keep spaces/hyphens as shown)
+   - Go to https://myaccount.google.com/apppasswords and follow the instructions
 3. **Use the credentials** in your `.env` file as shown above
 
 ### Alternative: Brevo (formerly Sendinblue)
@@ -197,3 +186,85 @@ For a modern developer-focused service:
 - **Configuration**: Requires API-based setup (more complex)
 
 **Note**: Without email configuration, you won't be able to log into Ghost Admin on Render, as the system will try to send magic link emails and fail.
+
+## Cost Breakdown (All Free Tier)
+
+- **Render**: 750 hours/month free
+- **Aiven MySQL**: Permanent free tier
+- **Cloudflare R2**: 10GB storage + unlimited egress
+- **Gmail SMTP**: 100 emails/day permanently free
+- **Total monthly cost**: $0
+
+This setup provides a production-ready Ghost CMS deployment without any recurring costs!
+
+## Appendix: Why Explicit Admin-X Component Ordering is Required
+
+### The Core Issue
+
+The most complex aspect of building Ghost from source for production deployment is the **explicit ordering of Admin-X component builds** in `render-build.sh`. This complexity stems from a fundamental difference in build environments:
+
+**Ghost's Standard Build Process:**
+- Runs **locally** on development machines or dedicated build servers
+- Has **full Nx daemon functionality** with automatic dependency resolution
+- Can leverage **complete Nx toolchain** for build orchestration
+- Builds locally, then deploys pre-built artifacts
+
+**Our Containerized Build Process:**
+- Runs **inside Docker containers** (Render's build environment)
+- **Nx daemon is disabled in Docker containers** ([GitHub Issue #14126](https://github.com/nrwl/nx/issues/14126))
+- **No automatic dependency resolution** → must manually specify build order
+- Must build and deploy directly from the container
+
+### Why This Matters for Admin-X Components
+
+**Ghost Admin (Ember.js) requires pre-built Admin-X components:**
+```
+Ghost Admin expects these files to exist:
+├── apps/admin-x-settings/dist/admin-x-settings.js
+├── apps/admin-x-activitypub/dist/admin-x-activitypub.js
+├── apps/posts/dist/posts.js
+└── apps/stats/dist/stats.js
+```
+
+**Without explicit ordering, builds fail with:**
+```
+ENOENT: no such file or directory, open '../../apps/admin-x-settings/dist/admin-x-settings.js'
+```
+
+**This happens because:**
+1. **Nx daemon** would normally handle dependency resolution automatically
+2. **In containers**, daemon is disabled so no automatic ordering occurs
+3. **Ghost Admin builds first** but can't find the Admin-X components it needs
+4. **Build fails** unless we manually ensure Admin-X components are built first
+
+### Our Solution: Manual Dependency Resolution
+
+```bash
+# Manually replicate what Nx daemon would do automatically:
+yarn workspace @tryghost/shade run build
+yarn workspace @tryghost/admin-x-design-system run build
+yarn workspace @tryghost/admin-x-framework run build
+yarn workspace @tryghost/admin-x-settings run build
+yarn workspace @tryghost/admin-x-activitypub run build
+yarn workspace @tryghost/posts run build
+yarn workspace @tryghost/stats run build
+yarn workspace ghost-admin run build  # Now has all dependencies
+```
+
+### Why This Approach Works
+
+- **Replicates Nx daemon functionality** manually in containerized environments
+- **Uses official component build scripts** (same as Ghost's internal process)
+- **Ensures correct dependency order** for Admin-X → Ghost Admin
+- **Enables PaaS deployment** where container builds are required
+- **Future-proof** as it follows Ghost's component architecture
+
+### Conclusion
+
+The explicit ordering isn't a flaw in our approach - it's **adapting Ghost's local build process to work in containerized environments**. We're manually providing the dependency resolution that Nx daemon would handle automatically in Ghost's standard builds.
+
+This complexity will remain necessary until either:
+1. Nx enables daemon functionality in Docker containers, or  
+2. Ghost provides official containerized build support for source deployments
+
+For now, this manual approach seems the most reliable way to deploy custom Ghost builds to container-based PaaS platforms like Render.

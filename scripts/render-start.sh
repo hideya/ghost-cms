@@ -11,6 +11,9 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+# Set production environment
+export NODE_ENV=production
+
 echo "Loading environment variables..."
 set -a; source .env; set +a
 
