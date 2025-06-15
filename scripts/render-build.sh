@@ -74,14 +74,15 @@ core_version=$(jq -r '.version' ghost/core/package.json)
 jq --arg v "$core_version" '.version = $v' package.json > package.tmp.json && mv package.tmp.json package.json
 echo "Updated root package.json version: $(grep '"version"' package.json | head -1)"
 
-# Build Ghost using official build targets in correct dependency orderAdd commentMore actions
-echo "Building Ghost assets and TypeScript..."
-yarn workspace ghost run build:assets
-yarn workspace ghost run build:tsc
-
 # Use Nx's automatic dependency resolution (works even without daemon)
 echo "Building Ghost using Nx automatic dependency resolution..."
 yarn build
+
+# Build Ghost core components that are normally handled by the archive target
+# See: ghost/core/package.json
+echo "Building Ghost core assets and TypeScript..."
+yarn workspace ghost run build:assets
+yarn workspace ghost run build:tsc
 
 # Verify that critical JavaScript files were created
 echo "Verifying build artifacts..."
